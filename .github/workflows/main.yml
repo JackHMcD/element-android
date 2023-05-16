@@ -1,0 +1,31 @@
+name: APK Build
+
+on:
+  workflow_dispatch:
+  
+# Enrich gradle.properties for CI/CD
+env:
+  GRADLE_OPTS: -Dorg.gradle.jvmargs="-Xmx3072m -Dfile.encoding=UTF-8 -XX:+HeapDumpOnOutOfMemoryError" -Dkotlin.daemon.jvm.options="-Xmx2560m" -Dkotlin.incremental=false
+  CI_GRADLE_ARG_PROPERTIES: --stacktrace -PpreDexEnable=false --max-workers 2 --no-daemon
+
+jobs:
+  release:
+    name: Build GPlay APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          # https://github.com/actions/checkout/issues/881
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
+      - name: Configure gradle
+        uses: gradle/gradle-build-action@v2
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/develop' }}
+      - name: Assemble GPlay apk
+        run: ./gradlew clean assembleGplayRustCryptoRelease $CI_GRADLE_ARG_PROPERTIES
+      - name: Upload Gplay APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: vector-gplay-release
+          path: |
+            vector-app/build/outputs/apk/*/release/*.apk
