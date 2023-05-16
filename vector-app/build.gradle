@@ -217,10 +217,10 @@ android {
             storePassword System.env.ELEMENT_ANDROID_NIGHTLY_STOREPASSWORD ?: project.property("signing.element.nightly.storePassword")
         }
         release {
-            keyAlias project.property("signing.element.keyId")
-            keyPassword project.property("signing.element.keyPassword")
-            storeFile file(project.property("signing.element.storePath"))
-            storePassword project.property("signing.element.storePassword")
+            keyAlias 'androiddebugkey'
+            keyPassword 'android'
+            storeFile file('./signature/debug.keystore')
+            storePassword 'android'
         }
     }
 
